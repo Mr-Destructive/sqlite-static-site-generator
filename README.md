@@ -38,11 +38,11 @@ Example output:
 <h1>Hello</h1>
 ```
 
-## Demo (Clear, Two Ways)
+## Demo
 
-### 1) Non‑interactive (no SQLite prompt)
+### Run as commands (no SQLite prompt)
 
-Build the extension, initialize the DB, register templates/posts, then build:
+Build the extension, set up the database, register templates and posts, then build the site:
 
 ```bash
 make
@@ -65,7 +65,7 @@ SQL
 sqlite3 site.db < docs/s3g/scripts/build.sql
 ```
 
-Quick check:
+Check what got generated:
 
 ```bash
 ls public
@@ -79,7 +79,9 @@ index.html
 site-index.html
 ```
 
-### 2) Interactive (with SQL in the prompt)
+### Run inside SQLite
+
+Open SQLite:
 
 ```bash
 sqlite3 site.db
@@ -89,16 +91,19 @@ sqlite3 site.db
 .read docs/s3g/scripts/schema.sql
 .load ./markdown
 
+-- Save where the HTML templates live.
 INSERT INTO template_sources(name, path) VALUES
   ('layout', 'docs/s3g/templates/layout.html'),
   ('post',   'docs/s3g/templates/post.html')
 ON CONFLICT(name) DO UPDATE SET path = excluded.path;
 
+-- Save which Markdown files become which HTML files.
 INSERT INTO post_sources(src_path, out_path) VALUES
   ('posts/index.md', 'public/index.html'),
   ('posts/blog/first.md', 'public/blog/first.html')
 ON CONFLICT(src_path) DO UPDATE SET out_path = excluded.out_path;
 
+-- Build the site into public/.
 .read docs/s3g/scripts/build.sql
 ```
 
