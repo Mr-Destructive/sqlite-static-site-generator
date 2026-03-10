@@ -1,0 +1,15 @@
+{
+  "type": "posts",
+  "title": "Advent of Code Day 4 in Golang: Finding XMAS and X-MAS",
+  "date": "2024-12-09",
+  "slug": "aoc-2024-day-4",
+  "series": [
+    "Advent of Code 2024"
+  ],
+  "tags": [
+    "go",
+    "aoc",
+    "advent-of-code",
+    "aoc-2024"
+  ]
+}

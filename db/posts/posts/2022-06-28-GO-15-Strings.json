@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: String Manipulation",
+  "date": "2022-06-28",
+  "slug": "golang-strings",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-015-strings.png"
+}

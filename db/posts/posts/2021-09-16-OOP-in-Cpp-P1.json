@@ -1,0 +1,15 @@
+{
+  "type": "posts",
+  "title": "Object-Oriented Programming in C++: Classes and Objects",
+  "subtitle": "Understanding the OOP concept and some basics semantics in C++",
+  "date": "2021-09-16",
+  "slug": "oop-cpp-p1",
+  "series": [
+    "Object Oriented Porgramming in C++"
+  ],
+  "tags": [
+    "c++",
+    "object-oriented-programming"
+  ],
+  "image_url": "https://res.cloudinary.com/dgpxbrwoz/image/upload/v1643287393/blogmedia/nfhszc3beo2y88enumz5.png"
+}

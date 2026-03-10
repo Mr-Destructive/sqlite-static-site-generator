@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Go Routines and WaitGroups",
+  "date": "2023-07-29",
+  "slug": "golang-go-routines",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-030-goroutines.png"
+}

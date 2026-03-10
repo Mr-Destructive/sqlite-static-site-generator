@@ -1,0 +1,9 @@
+{
+  "date": "2025-10-17",
+  "status": "published",
+  "link": "https://blog.burkert.me/posts/llm_evolution_character_manipulation/",
+  "preview_description": "Recently, I have been testing how well the newest generations of large language models (such as GPT-5 or Claude 4.5) handle natural language, specifically counting characters, manipulating characters in a sentences, or solving encoding and ciphers. Surprisingly, the newest models were able to solve these kinds of tasks, unlike previous generations of LLMs.\nCharacter manipulation LLMs handle individual characters poorly. This is due to all text being encoded as tokens via the LLM tokenizer and its vocabulary. Individual tokens typically represent clusters of characters, sometimes even full words (especially in English and other common languages in the training dataset). This makes any considerations on a more granular level than tokens fairly difficult, although LLMs have been capable of certain simple tasks (such as spelling out individual characters in a word) for a while.",
+  "preview_image": "https://blog.burkert.me/llm-character-text-manipulation.jpg",
+  "title": "LLMs are getting better at character-level manipulation",
+  "type": "links"
+}

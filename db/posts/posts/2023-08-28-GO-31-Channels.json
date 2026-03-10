@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Channels",
+  "date": "2023-08-28",
+  "slug": "golang-channels",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-031-channels.png"
+}

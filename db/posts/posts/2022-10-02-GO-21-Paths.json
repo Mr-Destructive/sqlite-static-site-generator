@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Paths",
+  "date": "2022-10-02",
+  "slug": "golang-paths",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-021-paths.png"
+}

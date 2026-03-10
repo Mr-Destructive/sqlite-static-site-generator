@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Math Package",
+  "date": "2022-04-25",
+  "slug": "golang-math",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-012-math-package.png"
+}

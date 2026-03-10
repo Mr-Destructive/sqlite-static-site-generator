@@ -1,0 +1,14 @@
+{
+  "type": "posts",
+  "title": "BASH Scripting Guide - PART - 1",
+  "subtitle": "The quick basic guide on foundational concepts of Bash scripting.",
+  "date": "2021-06-22",
+  "slug": "bash-guide-p1",
+  "series": [
+    "BASH Scripting Guide"
+  ],
+  "tags": [
+    "bash"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/bash-scripting-guide-p1.webp"
+}

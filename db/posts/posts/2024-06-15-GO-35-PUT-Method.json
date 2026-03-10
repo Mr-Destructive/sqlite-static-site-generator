@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang Web: PUT Method",
+  "date": "2024-06-15",
+  "slug": "golang-web-put-method",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/100-days-of-golang/golang-035-put-method.png"
+}

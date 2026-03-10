@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Maps",
+  "date": "2022-04-12",
+  "slug": "golang-maps",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-007-maps.png"
+}

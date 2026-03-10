@@ -1,0 +1,11 @@
+{
+  "type": "posts",
+  "title": "Why and How to make and use Vim as a text editor and customizable IDE",
+  "subtitle": "A beginners guide to the fascinating editor",
+  "date": "2021-02-20",
+  "slug": "vim-text-editor-ide",
+  "tags": [
+    "vim"
+  ],
+  "image_url": "https://github.com/Mr-Destructive/techstructive-blog/blob/jekyll/assets/img/vimguide.png?raw=true"
+}

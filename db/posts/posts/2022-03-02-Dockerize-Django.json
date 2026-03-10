@@ -1,0 +1,10 @@
+{
+  "type": "til",
+  "title": "Dockerize a Django project",
+  "date": "2022-03-02",
+  "slug": "dockerize-django-prj",
+  "tags": [
+    "django",
+    "docker"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "type": "projects",
+  "title": "Utility-Studio",
+  "date": "2023-07-14",
+  "status": "deployed",
+  "tags": [
+    "react",
+    "appwrite",
+    "typescript"
+  ],
+  "live_link": "https://utility-studio.vercel.app/",
+  "github_link": "https://github.com/Mr-Destructive/utility-studio/"
+}

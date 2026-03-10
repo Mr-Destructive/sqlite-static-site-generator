@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Date and Time",
+  "date": "2023-06-19",
+  "slug": "golang-date-time",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-028-date-time.png"
+}

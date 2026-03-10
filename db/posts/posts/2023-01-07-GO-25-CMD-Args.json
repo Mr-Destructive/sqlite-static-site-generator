@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Command Line Arguments",
+  "date": "2023-01-07",
+  "slug": "golang-command-line-args",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-025-cmd-args.png"
+}

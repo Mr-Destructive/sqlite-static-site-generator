@@ -1,0 +1,15 @@
+{
+  "type": "posts",
+  "title": "Django + HTMX CRUD application",
+  "date": "2022-07-31",
+  "slug": "django-htmx-crud",
+  "series": [
+    "Django-Series"
+  ],
+  "tags": [
+    "django",
+    "htmx",
+    "python"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/django-htmx-crud.png"
+}

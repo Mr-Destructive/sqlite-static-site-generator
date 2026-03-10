@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>s3g shell docs</title>
+  <style>
+    :root { --bg:#0b0b0b; --ink:#e8e8e8; --muted:#9b9b9b; --paper:#111111; --border:#2a2a2a; --accent:#4bd37b; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+    .wrap { max-width: 900px; margin: 24px auto; padding: 0 16px 48px; }
+    h1,h2,h3 { font-weight:600; }
+    code, pre { font-family: ui-monospace, Menlo, Consolas, monospace; }
+    pre { background: var(--paper); border:1px solid var(--border); padding:12px; border-radius:8px; overflow:auto; }
+    a { color: var(--accent); }
+    ul { margin: 0 0 16px 20px; }
+    p { margin: 0 0 12px; }
+  </style>
+</head>
+<body>
+  <main class="wrap"><h1>s3g shell docs</h1>
+
+<p>This project gives you a browser‑based SQLite shell over your blog data, plus a shareable render workflow.</p>
+
+<h2>What you can do</h2>
+
+<ul>
+<li>Query posts as SQL tables (`posts`, `tags`, `post_tags`)</li>
+<li>Generate a shareable render link from query results</li>
+<li>Export results as CSV/JSON/SQL</li>
+<li>Load your own SQL or `posts.json`</li>
+<li>Create ad‑hoc tables (including FTS) and run full‑text search</li>
+</ul>
+
+<h2>Open the shell</h2>
+
+<pre><code class="language-bash">
+cd /home/meet/code/projects/git/sqlite-markdown
+python3 -m http.server 8000
+</code></pre>
+
+<p>Open:</p>
+
+<pre><code class="language-">
+http://localhost:8000/db/
+</code></pre>
+
+<h2>Core tables</h2>
+
+<pre><code class="language-sql">
+.tables
+.schema posts
+</code></pre>
+
+<p>Tables:</p>
+<ul>
+<li>`posts`</li>
+<li>`tags`</li>
+<li>`post_tags`</li>
+</ul>
+
+<h2>Query examples</h2>
+
+<h3>Latest posts</h3>
+
+<pre><code class="language-sql">
+SELECT slug, title, date, section
+FROM posts
+ORDER BY date DESC
+LIMIT 10;
+</code></pre>
+
+<h3>Count by section</h3>
+
+<pre><code class="language-sql">
+SELECT section, COUNT(*) AS count
+FROM posts
+GROUP BY section
+ORDER BY count DESC;
+</code></pre>
+
+<h3>Find a post by slug</h3>
+
+<pre><code class="language-sql">
+SELECT title, date, body_md
+FROM posts
+WHERE slug = 'projects/palm_go_sdk'
+LIMIT 1;
+</code></pre>
+
+<h3>Search by title (simple)</h3>
+
+<pre><code class="language-sql">
+SELECT slug, title
+FROM posts
+WHERE title LIKE '%sqlite%'
+LIMIT 10;
+</code></pre>
+
+<h3>Tags (relational)</h3>
+
+<pre><code class="language-sql">
+SELECT p.slug, p.title, t.tag
+FROM posts p
+JOIN post_tags pt ON pt.post_id = p.id
+JOIN tags t ON t.id = pt.tag_id
+WHERE t.tag = 'sql'
+LIMIT 10;
+</code></pre>
+
+<h2>Render + share (stateless)</h2>
+
+<p>1. Run any query that returns `slug`, `title`, and/or `body_md`.</p>
+<p>2. Click **Share Render**.</p>
+<p>3. A URL is copied. Open it to view the rendered HTML.</p>
+
+<p>If your query doesn’t include `body_md`, the shell will auto‑hydrate it by `slug`.</p>
+
+<h2>Dot commands (all supported)</h2>
+
+<pre><code class="language-sql">
+.help [command]
+.tables [pattern]
+.indexes [table]
+.schema [pattern]
+.fullschema
+.databases
+.read [path]
+.reset
+.mode [table|column|list|line|csv|json]
+.headers [on|off]
+.separator [text]
+.nullvalue [text]
+.prompt [main] [continue]
+.print [text]
+.echo [on|off]
+.explain [on|off|full]
+.timer [on|off]
+.changes [on|off]
+.output [filename]
+.once [filename]
+.stats
+.version
+.log [filename|off]
+.clear
+.quiet [on|off]
+.share [--open]
+.show
+.dump [table]
+.import FILE TABLE
+</code></pre>
+
+<p>Unsupported in browser: `.open`, `.save`, `.backup`, `.restore`, `.shell`, etc.</p>
+
+<h2>Export results</h2>
+
+<h3>CSV</h3>
+
+<pre><code class="language-sql">
+.mode csv
+.headers on
+SELECT title, date FROM posts LIMIT 5;
+</code></pre>
+
+<h3>SQL dump</h3>
+
+<pre><code class="language-sql">
+.once dump.sql
+.dump
+</code></pre>
+
+<h2>Render from SQL result</h2>
+
+<p>Use any query that returns `body_md` or `slug`:</p>
+
+<pre><code class="language-sql">
+SELECT slug, title
+FROM posts
+WHERE section = 'links'
+LIMIT 5;
+</code></pre>
+
+<p>Then click **Share Render**.</p>
+
+<h2>Full‑text search (FTS4)</h2>
+
+<p>There is no prebuilt FTS table, but you can create one in the session:</p>
+
+<pre><code class="language-sql">
+CREATE VIRTUAL TABLE posts_fts USING fts4(title, body);
+INSERT INTO posts_fts(rowid, title, body)
+  SELECT id, title, body_md FROM posts;
+</code></pre>
+
+<p>Search:</p>
+
+<pre><code class="language-sql">
+SELECT p.slug, p.title
+FROM posts_fts f
+JOIN posts p ON p.id = f.rowid
+WHERE posts_fts MATCH 'sqlite';
+</code></pre>
+
+<p>Note: this is in‑memory for the session unless you export it.</p></main>
+</body>
+</html>

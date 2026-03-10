@@ -1,0 +1,10 @@
+{
+  "date": "2026-01-23",
+  "status": "published",
+  "link": "https://atlas9.dev/blog/soft-delete.html",
+  "title": "The challenges of soft delete",
+  "tags": [
+    "sql"
+  ],
+  "type": "links"
+}

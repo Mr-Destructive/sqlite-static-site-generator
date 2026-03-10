@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Generics",
+  "date": "2023-07-23",
+  "slug": "golang-generics",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-029-generics.png"
+}

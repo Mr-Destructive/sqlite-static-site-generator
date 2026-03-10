@@ -1,0 +1,15 @@
+{
+  "type": "posts",
+  "title": "Django Project with PostgreSQL Deployment on Railway App",
+  "date": "2022-05-19",
+  "slug": "django-deploy-railway",
+  "series": [
+    "Django-Deployment"
+  ],
+  "tags": [
+    "django",
+    "python",
+    "web-development"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/django-deploy-railway.png"
+}

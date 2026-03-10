@@ -1,0 +1,12 @@
+{
+  "date": "2025-12-19",
+  "status": "published",
+  "link": "https://thedailywtf.com/articles/duplicate-reports",
+  "preview_description": "Today's anonymous submitter sends us a short snippet. They found this because they were going through code committed by an expensive third-party contractor, trying to track down a bug: every report in the database kept getting duplicated for some reason.\nThis code has been in production for over a decade, bugs and all:\n",
+  "preview_image": "https://s3.amazonaws.com/remy.jetpackshark.com/remy-thumb.jpg",
+  "title": "Duplicate Reports",
+  "tags": [
+    "testing"
+  ],
+  "type": "links"
+}

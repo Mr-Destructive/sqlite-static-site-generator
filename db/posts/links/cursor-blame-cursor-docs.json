@@ -1,0 +1,12 @@
+{
+  "title": "Cursor Blame | Cursor Docs",
+  "date": "2026-01-29",
+  "slug": "cursor-blame-cursor-docs",
+  "status": "published",
+  "type": "links",
+  "description": "AI-aware git blame that distinguishes between AI-generated and human-written code.",
+  "tags": [
+    "ai",
+    "git"
+  ]
+}

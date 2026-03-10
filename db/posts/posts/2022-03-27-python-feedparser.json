@@ -1,0 +1,10 @@
+{
+  "type": "posts",
+  "title": "Feedparser: Python package for reading RSS feeds",
+  "date": "2022-03-26",
+  "slug": "python-feedparser",
+  "tags": [
+    "python"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/python-pkg-feedparser.png"
+}

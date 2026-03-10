@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Structs",
+  "date": "2022-04-14",
+  "slug": "golang-structs",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-009-structs.png"
+}

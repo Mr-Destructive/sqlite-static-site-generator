@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: What and Why?",
+  "date": "2022-04-01",
+  "slug": "golang-intro",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-000-why-go.png"
+}

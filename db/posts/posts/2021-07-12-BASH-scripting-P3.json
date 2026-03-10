@@ -1,0 +1,14 @@
+{
+  "type": "posts",
+  "title": "BASH Scripting Guide - PART - 3",
+  "subtitle": "Exploring some advance features, underrated tools and utilities in BASH.",
+  "date": "2021-07-12",
+  "slug": "bash-guide-p3",
+  "series": [
+    "BASH Scripting Guide"
+  ],
+  "tags": [
+    "bash"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/bash-scripting-guide-p3.webp"
+}

@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Slices",
+  "date": "2022-04-07",
+  "slug": "golang-slices",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-006-slices.png"
+}

@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Closures",
+  "date": "2022-08-11",
+  "slug": "golang-closures",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-018-closures.png"
+}

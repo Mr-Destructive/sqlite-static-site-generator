@@ -1,0 +1,15 @@
+{
+  "type": "posts",
+  "title": "Connect LibSQL Database hosted on Turso in a Golang Application",
+  "date": "2024-09-30",
+  "slug": "turso-libsql-db-golang",
+  "series": [
+    "lets-go-with-turso"
+  ],
+  "tags": [
+    "go",
+    "turso",
+    "libsql"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/connect-turso-libsql-golang.png"
+}

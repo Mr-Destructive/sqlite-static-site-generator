@@ -1,0 +1,10 @@
+{
+  "type": "posts",
+  "title": "Pipenv: Python's Official Package Management tool",
+  "date": "2022-03-14",
+  "slug": "pipenv-intro",
+  "tags": [
+    "python"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/python-pkg-pipenv.png"
+}

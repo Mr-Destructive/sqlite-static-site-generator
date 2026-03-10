@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang Web: POST Method",
+  "date": "2024-03-10",
+  "slug": "golang-web-post-method",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/100-days-of-golang/golang-034-post-method.png"
+}

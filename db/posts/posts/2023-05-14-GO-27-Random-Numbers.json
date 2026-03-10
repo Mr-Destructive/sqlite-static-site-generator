@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Random Numbers",
+  "date": "2023-05-14",
+  "slug": "golang-random-numbers",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-027-random-numbers.png"
+}

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SQLite Render</title>
+</head>
+<body>
+  <div id="app"></div>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+  <script>
+  (function () {
+    function decodePayload() {
+      const hash = window.location.hash || '';
+      const match = hash.match(/payload=([^&]+)/);
+      if (!match) return null;
+      const raw = match[1];
+      const json = LZString.decompressFromEncodedURIComponent(raw);
+      if (!json) return null;
+      return JSON.parse(json);
+    }
+
+    function replaceAll(template, vars) {
+      let out = template;
+      for (const [k, v] of Object.entries(vars)) {
+        const re = new RegExp(`{{\\s*${k}\\s*}}`, 'g');
+        out = out.replace(re, v == null ? '' : String(v));
+      }
+      return out;
+    }
+
+    async function getTemplates(payload) {
+      const layout = payload.templates && payload.templates.layout;
+      const post = payload.templates && payload.templates.post;
+      const layoutTpl = layout || await fetch('/docs/s3g/templates/layout.html').then(r => r.text());
+      const postTpl = post || await fetch('/docs/s3g/templates/post.html').then(r => r.text());
+      return { layoutTpl, postTpl };
+    }
+
+    function rowValue(row, cols, names) {
+      for (const n of names) {
+        const idx = cols.findIndex(c => c.toLowerCase() === n);
+        if (idx !== -1) return row[idx];
+      }
+      return '';
+    }
+
+    function renderList(rows, cols, postTpl, vars) {
+      return rows.map(row => {
+        const title = rowValue(row, cols, ['title']);
+        const date = rowValue(row, cols, ['date','published_at','created_at','updated_at']);
+        const desc = rowValue(row, cols, ['description','excerpt']);
+        const html = rowValue(row, cols, ['html','body_html']);
+        const md = rowValue(row, cols, ['body_md','content']);
+        const content = html || (md ? marked.parse(String(md)) : '');
+        return replaceAll(postTpl, {
+          title: title || vars.title || 'Untitled',
+          date: date || '',
+          description: desc || vars.description || '',
+          content
+        });
+      }).join('\n');
+    }
+
+    function renderSingle(rows, cols, postTpl, vars) {
+      if (!rows.length) return '<p>No rows</p>';
+      const row = rows[0];
+      const title = rowValue(row, cols, ['title']);
+      const date = rowValue(row, cols, ['date','published_at','created_at','updated_at']);
+      const desc = rowValue(row, cols, ['description','excerpt']);
+      const html = rowValue(row, cols, ['html','body_html']);
+      const md = rowValue(row, cols, ['body_md','content']);
+      const content = html || (md ? marked.parse(String(md)) : '');
+      return replaceAll(postTpl, {
+        title: title || vars.title || 'Untitled',
+        date: date || '',
+        description: desc || vars.description || '',
+        content
+      });
+    }
+
+    async function main() {
+      const payload = decodePayload();
+      const app = document.getElementById('app');
+      if (!payload) {
+        app.innerHTML = '<p>Missing payload.</p>';
+        return;
+      }
+
+      if (payload.error) {
+        app.innerHTML = `<pre style=\"white-space:pre-wrap\">${payload.error}</pre>`;
+        return;
+      }
+
+      const { layoutTpl, postTpl } = await getTemplates(payload);
+      const cols = payload.columns || [];
+      const rows = payload.rows || [];
+      const vars = payload.vars || {};
+      const mode = payload.mode || 'auto';
+
+      const firstTitle = rows.length ? rowValue(rows[0], cols, ['title']) : '';
+      const pageTitle = vars.title || firstTitle || 's3g render';
+
+      const body = (mode === 'post')
+        ? renderSingle(rows, cols, postTpl, vars)
+        : (mode === 'list' || rows.length > 1)
+          ? renderList(rows, cols, postTpl, vars)
+          : renderSingle(rows, cols, postTpl, vars);
+
+      const page = replaceAll(layoutTpl, {
+        title: pageTitle,
+        body
+      });
+
+      document.open();
+      document.write(page);
+      document.close();
+    }
+
+    main();
+  })();
+  </script>
+</body>
+</html>

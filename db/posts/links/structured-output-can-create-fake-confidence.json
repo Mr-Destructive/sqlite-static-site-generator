@@ -1,0 +1,9 @@
+{
+  "date": "2025-12-26",
+  "status": "published",
+  "link": "https://boundaryml.com/blog/structured-outputs-create-false-confidence",
+  "preview_description": "Constrained decoding seems like the greatest thing since sliced bread, but it often forces models to prioritize output conformance over output quality.",
+  "preview_image": "https://boundaryml.com/api/og?slug=structured-outputs-create-false-confidence",
+  "title": "Structured output can create fake confidence",
+  "type": "links"
+}

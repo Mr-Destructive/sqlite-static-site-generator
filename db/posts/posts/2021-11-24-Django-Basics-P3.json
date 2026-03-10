@@ -1,0 +1,16 @@
+{
+  "type": "posts",
+  "title": "Django Basics: Folder Structure",
+  "subtitle": "Understanding the folder structure of Django Projects and Applications",
+  "date": "2021-11-24",
+  "slug": "django-basics-folder-struct",
+  "series": [
+    "Django-Basics"
+  ],
+  "tags": [
+    "django",
+    "python",
+    "web-development"
+  ],
+  "image_url": "https://res.cloudinary.com/dgpxbrwoz/image/upload/v1637745125/blogmedia/4_gnddxj.png"
+}

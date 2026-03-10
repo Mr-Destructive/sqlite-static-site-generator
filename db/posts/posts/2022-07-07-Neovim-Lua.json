@@ -1,0 +1,11 @@
+{
+  "type": "posts",
+  "title": "Configure Neovim in Lua",
+  "date": "2022-07-09",
+  "slug": "neovim-vimscript-to-lua",
+  "tags": [
+    "vim",
+    "lua"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/vimtolua.png"
+}

@@ -1,0 +1,14 @@
+{
+  "type": "posts",
+  "title": "NGINX Survival Guide: Serving Web Applications",
+  "date": "2024-07-21",
+  "slug": "nginx-02-web-servers",
+  "series": [
+    "nginx-survival-guide"
+  ],
+  "tags": [
+    "nginx",
+    "web-development"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/nginx-survival-guide/nginx-sg-2.png"
+}

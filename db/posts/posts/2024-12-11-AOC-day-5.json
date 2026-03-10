@@ -1,0 +1,15 @@
+{
+  "type": "posts",
+  "title": "Advent of Code Day 5 in Golang: Ordering Pages",
+  "date": "2024-12-11",
+  "slug": "aoc-2024-day-5",
+  "series": [
+    "Advent of Code 2024"
+  ],
+  "tags": [
+    "go",
+    "aoc",
+    "advent-of-code",
+    "aoc-2024"
+  ]
+}

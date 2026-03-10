@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Regex",
+  "date": "2023-03-22",
+  "slug": "golang-regex",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-026-regex.png"
+}

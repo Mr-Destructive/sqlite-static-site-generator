@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Anonymous Functions",
+  "date": "2022-07-24",
+  "slug": "golang-anonymous-functions",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-017-anonymous-functions.png"
+}

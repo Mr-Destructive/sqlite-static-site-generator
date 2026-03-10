@@ -1,0 +1,16 @@
+{
+  "type": "posts",
+  "title": "Django Basics: What is it?",
+  "subtitle": "Understanding what and why of the Django framework",
+  "date": "2021-11-16",
+  "slug": "django-basics-intro",
+  "series": [
+    "Django-Basics"
+  ],
+  "tags": [
+    "django",
+    "python",
+    "web-development"
+  ],
+  "image_url": "https://res.cloudinary.com/dgpxbrwoz/image/upload/v1643289206/blogmedia/gbq3rlfat3erbxocn7yn.png"
+}

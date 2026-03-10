@@ -1,0 +1,15 @@
+{
+  "type": "posts",
+  "title": "Use Embedded Replicas of LibSQL Database hosted on Turso with a Golang Application",
+  "date": "2024-10-31",
+  "slug": "turso-libsql-embedded-replicas-golang",
+  "series": [
+    "lets-go-with-turso"
+  ],
+  "tags": [
+    "go",
+    "turso",
+    "libsql"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/embedded-replicas-libsql-turso-go.png"
+}

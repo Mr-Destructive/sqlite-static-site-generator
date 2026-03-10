@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Operators",
+  "date": "2022-05-07",
+  "slug": "golang-operators",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-013-operators.png"
+}

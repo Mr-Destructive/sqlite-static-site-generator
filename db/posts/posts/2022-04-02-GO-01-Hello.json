@@ -1,0 +1,13 @@
+{
+  "type": "posts",
+  "title": "Golang: Installation and Hello-World",
+  "date": "2022-04-02",
+  "slug": "hello-golang",
+  "series": [
+    "100-days-of-golang"
+  ],
+  "tags": [
+    "go"
+  ],
+  "image_url": "https://meetgor-cdn.pages.dev/golang-001-setup.png"
+}
