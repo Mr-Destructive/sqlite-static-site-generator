@@ -2,11 +2,90 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta http-equiv="refresh" content="0; url=/db/" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>s3g shell</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <p>Redirecting to <a href="/db/">/db/</a>...</p>
+  <div class="page">
+    <header class="topbar">
+      <div class="title">s3g shell</div>
+      <div class="subtitle">sqlite static site generator shell</div>
+    </header>
+
+    <main class="terminal">
+      <div id="screen" class="screen"></div>
+      <div class="prompt">
+        <span class="prompt-label">sqlite&gt;</span>
+        <input id="sql-input" class="prompt-input" spellcheck="false" autocomplete="off" />
+      </div>
+    </main>
+
+    <div class="top-actions">
+      <button id="theme-toggle" class="theme-btn" title="Toggle theme" type="button">Light</button>
+      <button id="options-toggle" class="toggle-pill" aria-expanded="false" title="Open options" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7h10M18 7h2M6 12h14M4 17h6M12 17h8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="16" cy="7" r="2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <circle cx="8" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        </svg>
+      </button>
+    </div>
+
+    <aside class="options-panel" id="options-panel">
+      <div class="options-header">
+        <div class="section-title">OPTIONS</div>
+        <button id="options-close" class="ghost" type="button">Close</button>
+      </div>
+      <div class="options-grid">
+        <div class="section" id="status-panel">
+          <div class="section-title">Status</div>
+          <div class="status-line">Loaded posts: <span id="status-posts">-</span></div>
+          <div class="status-line">Last rows: <span id="status-rows">-</span></div>
+          <div class="status-line">Last run: <span id="status-time">-</span></div>
+          <div class="status-line">Last share: <span id="status-share">-</span></div>
+        </div>
+        <div class="section">
+          <div class="section-title">Session</div>
+          <button id="reset" class="danger">Reset DB</button>
+          <button id="load-seed">Load bundled posts</button>
+          <button id="clear-screen">Clear Screen</button>
+          <button id="copy-screen">Copy Screen</button>
+        </div>
+        <div class="section">
+          <div class="section-title">Imports</div>
+          <label class="file">Load SQL <input id="sql-file" type="file" accept=".sql" /></label>
+          <label class="file">Load posts.json <input id="json-file" type="file" accept=".json" /></label>
+          <input id="import-file" type="file" accept=".csv,.txt" style="display:none" />
+        </div>
+        <div class="section">
+          <div class="section-title">Render</div>
+          <select id="render-mode">
+            <option value="auto">Render: auto</option>
+            <option value="list">Render: list</option>
+            <option value="post">Render: post</option>
+          </select>
+          <button id="share-render">Share Render</button>
+          <input id="share-url" class="share-url" placeholder="share url will appear here" readonly />
+          <button id="copy-share">Copy Link</button>
+        </div>
+        <details class="overrides">
+          <summary>Advanced overrides</summary>
+          <div class="override-grid">
+            <input id="var-title" placeholder="Title override" />
+            <input id="var-description" placeholder="Description override" />
+            <input id="var-layout-class" placeholder="Layout class" />
+            <textarea id="tpl-layout" placeholder="Layout template (optional)"></textarea>
+            <textarea id="tpl-post" placeholder="Post template (optional)"></textarea>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.13.0/sql-wasm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
