@@ -19,7 +19,8 @@ jobs:
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           TURSO_POSTS_QUERY: ${{ secrets.TURSO_POSTS_QUERY }}
         run: |
-          go run ./scripts/sync --since-hours 24
+          cd scripts/sync
+          go run . --since-hours 24
       - name: Commit changes
         run: |
           git status --porcelain

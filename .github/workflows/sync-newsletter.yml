@@ -20,7 +20,8 @@ jobs:
           TURSO_POSTS_QUERY: ${{ secrets.TURSO_POSTS_QUERY }}
           NEWSLETTER_RSS_URL: ${{ secrets.NEWSLETTER_RSS_URL }}
         run: |
-          go run ./scripts/sync --since-hours 168 --newsletter
+          cd scripts/sync
+          go run . --since-hours 168 --newsletter
       - name: Commit changes
         run: |
           git status --porcelain

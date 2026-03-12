@@ -37,7 +37,8 @@ func main() {
 	)
 	flag.Parse()
 
-	repoRoot, _ := os.Getwd()
+	cwd, _ := os.Getwd()
+	repoRoot := findRepoRoot(cwd)
 	postsDir := filepath.Join(repoRoot, "db", "posts")
 	dataDir := filepath.Join(repoRoot, "db", "data")
 
@@ -194,6 +195,23 @@ func main() {
 	}
 
 	fmt.Printf("Synced %d posts\n", len(posts))
+}
+
+func findRepoRoot(start string) string {
+	if env := os.Getenv("REPO_ROOT"); env != "" {
+		return env
+	}
+	dir := start
+	for {
+		if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return start
+		}
+		dir = parent
+	}
 }
 
 func writePostsJSON(path string, posts []Post) error {
