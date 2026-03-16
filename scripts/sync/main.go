@@ -140,9 +140,10 @@ func main() {
 		}
 		nPosts, err := fetchNewsletter(rssURL)
 		if err != nil {
-			die(err)
+			fmt.Fprintf(os.Stderr, "newsletter sync skipped: %v\n", err)
+		} else {
+			posts = append(posts, nPosts...)
 		}
-		posts = append(posts, nPosts...)
 	}
 
 	// overwrite db/posts
@@ -320,27 +321,27 @@ func fetchNewsletter(url string) ([]Post, error) {
 	tryFetch := func(feedURL string) (*gofeed.Feed, string, error) {
 		req, err := http.NewRequest(http.MethodGet, feedURL, nil)
 		if err != nil {
-			return nil, "", err
+			return nil, "", fmt.Errorf("%s: %w", feedURL, err)
 		}
 		req.Header.Set("User-Agent", "sqlite-static-site-generator/1.0")
 		req.Header.Set("Accept", "application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.1")
 		resp, err := client.Do(req)
 		if err != nil {
-			return nil, "", err
+			return nil, "", fmt.Errorf("%s: %w", feedURL, err)
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-			return nil, resp.Status, fmt.Errorf("newsletter feed returned status %s", resp.Status)
+			return nil, resp.Status, fmt.Errorf("%s: newsletter feed returned status %s", feedURL, resp.Status)
 		}
 		b, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return nil, resp.Status, err
+			return nil, resp.Status, fmt.Errorf("%s: %w", feedURL, err)
 		}
 		parser := gofeed.NewParser()
 		contentType := resp.Header.Get("Content-Type")
 		feed, err := parser.ParseString(string(b))
 		if err != nil {
-			return nil, resp.Status, fmt.Errorf("failed to parse feed (content-type %q): %w", contentType, err)
+			return nil, resp.Status, fmt.Errorf("%s: failed to parse feed (content-type %q): %w", feedURL, contentType, err)
 		}
 		return feed, resp.Status, nil
 	}
