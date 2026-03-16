@@ -348,20 +348,28 @@ func fetchNewsletter(url string) ([]Post, error) {
 
 	feed, status, err := tryFetch(url)
 	if err != nil {
-		// Substack sometimes blocks CI with 403; try a couple of fallbacks.
-		if status == "403 Forbidden" && strings.Contains(url, "substack.com/") {
-			proxyURL := "https://r.jina.ai/http://" + strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://")
-			feed, status, err = tryFetch(proxyURL)
-			if err != nil && status == "403 Forbidden" {
-				// RSSHub fallback for Substack.
-				blog := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://"), "/feed")
-				parts := strings.Split(blog, ".")
-				substackName := parts[0]
-				rsshubURL := "https://rsshub.app/substack/blog/" + substackName
-				feed, _, err = tryFetch(rsshubURL)
+		// Substack is often blocked from CI. Try multiple fallbacks for any non-2xx.
+		if strings.Contains(url, "substack.com/") {
+			blog := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://"), "/feed")
+			parts := strings.Split(blog, ".")
+			substackName := parts[0]
+			fallbacks := []string{
+				"https://rsshub.app/substack/blog/" + substackName,
+				"https://r.jina.ai/http://" + strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://"),
 			}
-		}
-		if err != nil {
+			errs := []string{err.Error()}
+			_ = status
+			for _, fb := range fallbacks {
+				feed, _, err = tryFetch(fb)
+				if err == nil {
+					break
+				}
+				errs = append(errs, err.Error())
+			}
+			if err != nil {
+				return nil, fmt.Errorf("all newsletter feed attempts failed: %s", strings.Join(errs, " | "))
+			}
+		} else {
 			return nil, err
 		}
 	}
