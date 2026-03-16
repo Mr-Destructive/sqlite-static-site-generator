@@ -317,19 +317,29 @@ func pickDate(publishedAt, createdAt, updatedAt string) string {
 
 func fetchNewsletter(url string) ([]Post, error) {
 	client := &http.Client{Timeout: 20 * time.Second}
-	resp, err := client.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "sqlite-static-site-generator/1.0")
+	req.Header.Set("Accept", "application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.1")
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("newsletter feed returned status %s", resp.Status)
+	}
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 	parser := gofeed.NewParser()
+	contentType := resp.Header.Get("Content-Type")
 	feed, err := parser.ParseString(string(b))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse feed (content-type %q): %w", contentType, err)
 	}
 
 	posts := []Post{}
