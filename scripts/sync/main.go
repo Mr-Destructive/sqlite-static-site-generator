@@ -317,29 +317,52 @@ func pickDate(publishedAt, createdAt, updatedAt string) string {
 
 func fetchNewsletter(url string) ([]Post, error) {
 	client := &http.Client{Timeout: 20 * time.Second}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
+	tryFetch := func(feedURL string) (*gofeed.Feed, string, error) {
+		req, err := http.NewRequest(http.MethodGet, feedURL, nil)
+		if err != nil {
+			return nil, "", err
+		}
+		req.Header.Set("User-Agent", "sqlite-static-site-generator/1.0")
+		req.Header.Set("Accept", "application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.1")
+		resp, err := client.Do(req)
+		if err != nil {
+			return nil, "", err
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			return nil, resp.Status, fmt.Errorf("newsletter feed returned status %s", resp.Status)
+		}
+		b, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, resp.Status, err
+		}
+		parser := gofeed.NewParser()
+		contentType := resp.Header.Get("Content-Type")
+		feed, err := parser.ParseString(string(b))
+		if err != nil {
+			return nil, resp.Status, fmt.Errorf("failed to parse feed (content-type %q): %w", contentType, err)
+		}
+		return feed, resp.Status, nil
 	}
-	req.Header.Set("User-Agent", "sqlite-static-site-generator/1.0")
-	req.Header.Set("Accept", "application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.1")
-	resp, err := client.Do(req)
+
+	feed, status, err := tryFetch(url)
 	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("newsletter feed returned status %s", resp.Status)
-	}
-	b, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	parser := gofeed.NewParser()
-	contentType := resp.Header.Get("Content-Type")
-	feed, err := parser.ParseString(string(b))
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse feed (content-type %q): %w", contentType, err)
+		// Substack sometimes blocks CI with 403; try a couple of fallbacks.
+		if status == "403 Forbidden" && strings.Contains(url, "substack.com/") {
+			proxyURL := "https://r.jina.ai/http://" + strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://")
+			feed, status, err = tryFetch(proxyURL)
+			if err != nil && status == "403 Forbidden" {
+				// RSSHub fallback for Substack.
+				blog := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://"), "/feed")
+				parts := strings.Split(blog, ".")
+				substackName := parts[0]
+				rsshubURL := "https://rsshub.app/substack/blog/" + substackName
+				feed, _, err = tryFetch(rsshubURL)
+			}
+		}
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	posts := []Post{}
