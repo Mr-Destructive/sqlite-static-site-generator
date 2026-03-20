@@ -1,6 +1,7 @@
-import Database from "better-sqlite3";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import initSqlJs from "sql.js";
 
 function json(res, status, body) {
   res.statusCode = status;
@@ -16,14 +17,33 @@ function isReadOnlySql(sql) {
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = path.join(__dirname, "..", "site.db");
-let db;
+const ROOT = path.join(__dirname, "..");
+const DB_PATH = path.join(ROOT, "site.db");
+const WASM_PATH = path.join(ROOT, "node_modules", "sql.js", "dist", "sql-wasm.wasm");
+const DB_BUFFER = fs.readFileSync(DB_PATH);
 
-function getDb() {
-  if (!db) {
-    db = new Database(DB_PATH, { readonly: true, fileMustExist: true });
+let sqlJsPromise;
+
+function loadSqlJs() {
+  if (!sqlJsPromise) {
+    sqlJsPromise = initSqlJs({
+      locateFile: (file) => {
+        if (file === "sql-wasm.wasm") return WASM_PATH;
+        return file;
+      },
+    });
   }
-  return db;
+  return sqlJsPromise;
+}
+
+async function withDatabase(callback) {
+  const SQL = await loadSqlJs();
+  const db = new SQL.Database(new Uint8Array(DB_BUFFER));
+  try {
+    return await callback(db);
+  } finally {
+    db.close();
+  }
 }
 
 export default async function handler(req, res) {
@@ -62,14 +82,19 @@ export default async function handler(req, res) {
     return json(res, 400, { error: "Only single-statement SELECT/CTE queries are allowed" });
   }
 
-  const database = getDb();
   try {
-    const stmt = database.prepare(sql);
-    const columns = stmt.columns().map((col) => col.name);
-    const rows = stmt.all(...args).map((row) =>
-      columns.map((column) => (row?.[column] ?? null))
-    );
-    return json(res, 200, { columns, rows });
+    const result = await withDatabase((db) => {
+      const stmt = db.prepare(sql);
+      const columns = stmt.getColumnNames();
+      const rows = [];
+      while (stmt.step()) {
+        const rowObj = stmt.getAsObject();
+        rows.push(columns.map((column) => (Object.prototype.hasOwnProperty.call(rowObj, column) ? rowObj[column] : null)));
+      }
+      stmt.free();
+      return { columns, rows };
+    });
+    return json(res, 200, result);
   } catch (err) {
     return json(res, 500, { error: err?.message || "Query failed" });
   }
