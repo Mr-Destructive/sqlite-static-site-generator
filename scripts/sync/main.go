@@ -328,10 +328,6 @@ func pickDate(publishedAt, createdAt, updatedAt string) string {
 	return ""
 }
 
-func isRunningInCI() bool {
-	return os.Getenv("GITHUB_ACTIONS") == "true" || os.Getenv("CI") != ""
-}
-
 func parseNewsletter(feed *gofeed.Feed) []Post {
 	posts := []Post{}
 	for _, item := range feed.Items {
@@ -403,21 +399,11 @@ func fetchNewsletter(url string) ([]Post, error) {
 		parts := strings.Split(blog, ".")
 		substackName := parts[0]
 
-		var fallbacks []string
-		if isRunningInCI() {
-			// In CI: prioritize RSSHub to bypass Substack IP blocks
-			fallbacks = []string{
-				"https://rsshub.app/substack/blog/" + substackName,
-				url,
-				"https://r.jina.ai/http://" + strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://"),
-			}
-		} else {
-			// Locally: try direct first, then fallbacks
-			fallbacks = []string{
-				url,
-				"https://rsshub.app/substack/blog/" + substackName,
-				"https://r.jina.ai/http://" + strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://"),
-			}
+		// Try direct Substack first (works locally), then fallbacks
+		fallbacks := []string{
+			url,
+			"https://rsshub.app/substack/blog/" + substackName,
+			"https://r.jina.ai/http://" + strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://"),
 		}
 
 		errs := []string{}
