@@ -20,7 +20,8 @@ export default async function handler(req, res) {
   }
 
   const url = process.env.TURSO_DB_URL;
-  const authToken = process.env.TURSO_AUTH_TOKEN;
+  const authToken =
+    process.env.TURSO_AUTH_TOKEN || process.env.TURSO_DB_AUTH_TOKEN;
   if (!url || !authToken) {
     return json(res, 500, { error: "Missing TURSO_DB_URL or TURSO_AUTH_TOKEN" });
   }
