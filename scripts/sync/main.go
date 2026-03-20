@@ -328,6 +328,40 @@ func pickDate(publishedAt, createdAt, updatedAt string) string {
 	return ""
 }
 
+func isRunningInCI() bool {
+	return os.Getenv("GITHUB_ACTIONS") == "true" || os.Getenv("CI") != ""
+}
+
+func parseNewsletter(feed *gofeed.Feed) []Post {
+	posts := []Post{}
+	for _, item := range feed.Items {
+		date := ""
+		if item.PublishedParsed != nil {
+			date = item.PublishedParsed.Format("2006-01-02")
+		}
+		body := item.Content
+		if body == "" {
+			body = item.Description
+		}
+		slug := slugFromTitle(item.Title)
+		posts = append(posts, Post{
+			Slug:    "newsletter/" + slug,
+			Section: "newsletter",
+			Path:    "newsletter/" + slug + ".md",
+			Title:   item.Title,
+			Date:    date,
+			Tags:    []string{"newsletter"},
+			Meta: map[string]interface{}{
+				"link":   item.Link,
+				"source": "substack",
+			},
+			BodyMD: body,
+			Source: "substack",
+		})
+	}
+	return posts
+}
+
 func fetchNewsletter(url string) ([]Post, error) {
 	client := &http.Client{Timeout: 20 * time.Second}
 	tryFetch := func(feedURL string) (*gofeed.Feed, string, error) {
@@ -361,61 +395,48 @@ func fetchNewsletter(url string) ([]Post, error) {
 		return feed, resp.Status, nil
 	}
 
-	feed, status, err := tryFetch(url)
-	if err != nil {
-		// Substack is often blocked from CI. Try multiple fallbacks for any non-2xx.
-		if strings.Contains(url, "substack.com/") {
-			blog := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://"), "/feed")
-			parts := strings.Split(blog, ".")
-			substackName := parts[0]
-			fallbacks := []string{
+	var feed *gofeed.Feed
+	var err error
+
+	if strings.Contains(url, "substack.com/") {
+		blog := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://"), "/feed")
+		parts := strings.Split(blog, ".")
+		substackName := parts[0]
+
+		var fallbacks []string
+		if isRunningInCI() {
+			// In CI: prioritize RSSHub to bypass Substack IP blocks
+			fallbacks = []string{
+				"https://rsshub.app/substack/blog/" + substackName,
+				url,
+				"https://r.jina.ai/http://" + strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://"),
+			}
+		} else {
+			// Locally: try direct first, then fallbacks
+			fallbacks = []string{
+				url,
 				"https://rsshub.app/substack/blog/" + substackName,
 				"https://r.jina.ai/http://" + strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://"),
 			}
-			errs := []string{err.Error()}
-			_ = status
-			for _, fb := range fallbacks {
-				feed, _, err = tryFetch(fb)
-				if err == nil {
-					break
-				}
-				errs = append(errs, err.Error())
-			}
-			if err != nil {
-				return nil, fmt.Errorf("all newsletter feed attempts failed: %s", strings.Join(errs, " | "))
-			}
-		} else {
-			return nil, err
 		}
+
+		errs := []string{}
+		for _, fb := range fallbacks {
+			feed, _, err = tryFetch(fb)
+			if err == nil {
+				return parseNewsletter(feed), nil
+			}
+			errs = append(errs, err.Error())
+		}
+		return nil, fmt.Errorf("all newsletter feed attempts failed: %s", strings.Join(errs, " | "))
 	}
 
-	posts := []Post{}
-	for _, item := range feed.Items {
-		date := ""
-		if item.PublishedParsed != nil {
-			date = item.PublishedParsed.Format("2006-01-02")
-		}
-		body := item.Content
-		if body == "" {
-			body = item.Description
-		}
-		slug := slugFromTitle(item.Title)
-		posts = append(posts, Post{
-			Slug:    "newsletter/" + slug,
-			Section: "newsletter",
-			Path:    "newsletter/" + slug + ".md",
-			Title:   item.Title,
-			Date:    date,
-			Tags:    []string{"newsletter"},
-			Meta: map[string]interface{}{
-				"link":   item.Link,
-				"source": "substack",
-			},
-			BodyMD: body,
-			Source: "substack",
-		})
+	feed, _, err = tryFetch(url)
+	if err != nil {
+		return nil, err
 	}
-	return posts, nil
+
+	return parseNewsletter(feed), nil
 }
 
 func die(err error) {
