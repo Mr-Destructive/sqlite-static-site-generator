@@ -1,13 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "npm run vercel-build",
+  "buildCommand": "mkdir -p public/data && cp -R data/* public/data/ && cp index.html app.js styles.css public/",
   "builds": [
     { "src": "api/index.js", "use": "@vercel/node" }
   ],
-  "publicPath": "public",
   "routes": [
     { "src": "^/api/?(.*)$", "dest": "/api/index.js" },
-    { "src": "^/data/(.*)$", "dest": "/data/$1" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
