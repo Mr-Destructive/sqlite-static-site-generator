@@ -171,6 +171,9 @@ export default async function handler(req, res) {
   try {
     const result = await withDatabase((db) => {
       const stmt = db.prepare(sql);
+      if (args.length > 0) {
+        stmt.bind(args);
+      }
       const columns = stmt.getColumnNames();
       const rows = [];
       while (stmt.step()) {
