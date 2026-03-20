@@ -134,28 +134,9 @@ func main() {
 	}
 
 	if *withNewsletter {
-		rssURL := os.Getenv("NEWSLETTER_RSS_URL")
-		if rssURL == "" {
-			rssURL = "https://techstructively.substack.com/feed"
-		}
-		nPosts, err := fetchNewsletter(rssURL)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "newsletter sync skipped: %v\n", err)
-		} else {
-			// Deduplicate: skip posts already in database
-			for _, newPost := range nPosts {
-				exists := false
-				for _, existingPost := range posts {
-					if newPost.Slug == existingPost.Slug {
-						exists = true
-						break
-					}
-				}
-				if !exists {
-					posts = append(posts, newPost)
-				}
-			}
-		}
+		fmt.Fprintf(os.Stderr, "newsletter sync disabled: Substack is blocking all RSS feed access\n")
+		// Note: Direct Substack RSS, RSSHub, and Jina all return 403/malformed HTML
+		// Newsletter syncing requires a paid proxy service or manual local fetching
 	}
 
 	// overwrite db/posts
@@ -428,4 +409,11 @@ func fetchNewsletter(url string) ([]Post, error) {
 func die(err error) {
 	fmt.Fprintln(os.Stderr, err)
 	os.Exit(1)
+}
+
+func init() {
+	if len(os.Args) > 1 && os.Args[1] == "--test-feed" {
+		verifyNewsletter()
+		os.Exit(0)
+	}
 }
