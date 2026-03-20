@@ -1,4 +1,6 @@
-import { createClient } from "@libsql/client";
+import Database from "better-sqlite3";
+import path from "path";
+import { fileURLToPath } from "url";
 
 function json(res, status, body) {
   res.statusCode = status;
@@ -13,17 +15,21 @@ function isReadOnlySql(sql) {
   return trimmed.startsWith("select ") || trimmed.startsWith("with ");
 }
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DB_PATH = path.join(__dirname, "..", "site.db");
+let db;
+
+function getDb() {
+  if (!db) {
+    db = new Database(DB_PATH, { readonly: true, fileMustExist: true });
+  }
+  return db;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET" && req.method !== "POST") {
     res.setHeader("Allow", "GET, POST");
     return json(res, 405, { error: "Method not allowed" });
-  }
-
-  const url = process.env.TURSO_DB_URL;
-  const authToken =
-    process.env.TURSO_AUTH_TOKEN || process.env.TURSO_DB_AUTH_TOKEN;
-  if (!url || !authToken) {
-    return json(res, 500, { error: "Missing TURSO_DB_URL or TURSO_AUTH_TOKEN" });
   }
 
   let sql = "";
@@ -56,10 +62,14 @@ export default async function handler(req, res) {
     return json(res, 400, { error: "Only single-statement SELECT/CTE queries are allowed" });
   }
 
+  const database = getDb();
   try {
-    const client = createClient({ url, authToken });
-    const result = await client.execute({ sql, args });
-    return json(res, 200, { columns: result.columns, rows: result.rows });
+    const stmt = database.prepare(sql);
+    const columns = stmt.columns().map((col) => col.name);
+    const rows = stmt.all(...args).map((row) =>
+      columns.map((column) => (row?.[column] ?? null))
+    );
+    return json(res, 200, { columns, rows });
   } catch (err) {
     return json(res, 500, { error: err?.message || "Query failed" });
   }
