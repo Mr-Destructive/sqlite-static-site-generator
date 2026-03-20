@@ -335,8 +335,11 @@ func fetchNewsletter(url string) ([]Post, error) {
 		if err != nil {
 			return nil, "", fmt.Errorf("%s: %w", feedURL, err)
 		}
-		req.Header.Set("User-Agent", "sqlite-static-site-generator/1.0")
+		req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
 		req.Header.Set("Accept", "application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.1")
+		req.Header.Set("Accept-Language", "en-US,en;q=0.9")
+		req.Header.Set("Accept-Encoding", "gzip, deflate")
+		req.Header.Set("Referer", "https://www.google.com/")
 		resp, err := client.Do(req)
 		if err != nil {
 			return nil, "", fmt.Errorf("%s: %w", feedURL, err)
