@@ -142,7 +142,19 @@ func main() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "newsletter sync skipped: %v\n", err)
 		} else {
-			posts = append(posts, nPosts...)
+			// Deduplicate: skip posts already in database
+			for _, newPost := range nPosts {
+				exists := false
+				for _, existingPost := range posts {
+					if newPost.Slug == existingPost.Slug {
+						exists = true
+						break
+					}
+				}
+				if !exists {
+					posts = append(posts, newPost)
+				}
+			}
 		}
 	}
 
