@@ -134,9 +134,7 @@ func main() {
 	}
 
 	if *withNewsletter {
-		fmt.Fprintf(os.Stderr, "newsletter sync disabled: Substack is blocking all RSS feed access\n")
-		// Note: Direct Substack RSS, RSSHub, and Jina all return 403/malformed HTML
-		// Newsletter syncing requires a paid proxy service or manual local fetching
+		verifyNewsletter()
 	}
 
 	// overwrite db/posts
@@ -341,66 +339,31 @@ func parseNewsletter(feed *gofeed.Feed) []Post {
 
 func fetchNewsletter(url string) ([]Post, error) {
 	client := &http.Client{Timeout: 20 * time.Second}
-	tryFetch := func(feedURL string) (*gofeed.Feed, string, error) {
-		req, err := http.NewRequest(http.MethodGet, feedURL, nil)
-		if err != nil {
-			return nil, "", fmt.Errorf("%s: %w", feedURL, err)
-		}
-		req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-		req.Header.Set("Accept", "application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.1")
-		req.Header.Set("Accept-Language", "en-US,en;q=0.9")
-		req.Header.Set("Accept-Encoding", "gzip, deflate")
-		req.Header.Set("Referer", "https://www.google.com/")
-		resp, err := client.Do(req)
-		if err != nil {
-			return nil, "", fmt.Errorf("%s: %w", feedURL, err)
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-			return nil, resp.Status, fmt.Errorf("%s: newsletter feed returned status %s", feedURL, resp.Status)
-		}
-		b, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, resp.Status, fmt.Errorf("%s: %w", feedURL, err)
-		}
-		parser := gofeed.NewParser()
-		contentType := resp.Header.Get("Content-Type")
-		feed, err := parser.ParseString(string(b))
-		if err != nil {
-			return nil, resp.Status, fmt.Errorf("%s: failed to parse feed (content-type %q): %w", feedURL, contentType, err)
-		}
-		return feed, resp.Status, nil
-	}
-
-	var feed *gofeed.Feed
-	var err error
-
-	if strings.Contains(url, "substack.com/") {
-		blog := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://"), "/feed")
-		parts := strings.Split(blog, ".")
-		substackName := parts[0]
-
-		// Try direct Substack first (works locally), then fallbacks
-		fallbacks := []string{
-			url,
-			"https://rsshub.app/substack/blog/" + substackName,
-			"https://r.jina.ai/http://" + strings.TrimPrefix(strings.TrimPrefix(url, "https://"), "http://"),
-		}
-
-		errs := []string{}
-		for _, fb := range fallbacks {
-			feed, _, err = tryFetch(fb)
-			if err == nil {
-				return parseNewsletter(feed), nil
-			}
-			errs = append(errs, err.Error())
-		}
-		return nil, fmt.Errorf("all newsletter feed attempts failed: %s", strings.Join(errs, " | "))
-	}
-
-	feed, _, err = tryFetch(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", url, err)
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+	req.Header.Set("Accept", "application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.1")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
+	req.Header.Set("Referer", "https://www.google.com/")
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", url, err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("%s: newsletter feed returned status %s", url, resp.Status)
+	}
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", url, err)
+	}
+	parser := gofeed.NewParser()
+	contentType := resp.Header.Get("Content-Type")
+	feed, err := parser.ParseString(string(b))
+	if err != nil {
+		return nil, fmt.Errorf("%s: failed to parse feed (content-type %q): %w", url, contentType, err)
 	}
 
 	return parseNewsletter(feed), nil
@@ -409,6 +372,18 @@ func fetchNewsletter(url string) ([]Post, error) {
 func die(err error) {
 	fmt.Fprintln(os.Stderr, err)
 	os.Exit(1)
+}
+
+func verifyNewsletter() {
+	rssURL := os.Getenv("NEWSLETTER_RSS_URL")
+	if rssURL == "" {
+		rssURL = "https://www.meetgor.com/type/newsletter/rss.xml"
+	}
+	posts, err := fetchNewsletter(rssURL)
+	if err != nil {
+		die(err)
+	}
+	fmt.Fprintf(os.Stderr, "newsletter fetch succeeded (%d posts)\n", len(posts))
 }
 
 func init() {

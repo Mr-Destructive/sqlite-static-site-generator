@@ -22,7 +22,7 @@ jobs:
           TURSO_DB_URL: ${{ secrets.TURSO_DB_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           TURSO_POSTS_QUERY: ${{ secrets.TURSO_POSTS_QUERY || 'SELECT slug, title, content, excerpt, tags, metadata, type_id, created_at, updated_at, published_at, status FROM posts WHERE status=''published''' }}
-          NEWSLETTER_RSS_URL: ${{ secrets.NEWSLETTER_RSS_URL || 'https://techstructively.substack.com/feed' }}
+          NEWSLETTER_RSS_URL: ${{ secrets.NEWSLETTER_RSS_URL || 'https://www.meetgor.com/type/newsletter/rss.xml' }}
         run: |
           cd scripts/sync
           go run . --since-hours 168 --newsletter
