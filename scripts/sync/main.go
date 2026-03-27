@@ -39,7 +39,7 @@ func main() {
 
 	cwd, _ := os.Getwd()
 	repoRoot := findRepoRoot(cwd)
-	dataDir := filepath.Join(repoRoot, "db", "data")
+	dataDir := filepath.Join(repoRoot, "data")
 
 	if err := os.MkdirAll(dataDir, 0o755); err != nil {
 		die(err)
