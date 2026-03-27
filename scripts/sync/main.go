@@ -44,7 +44,7 @@ func main() {
 	}
 
 	if *rssURL == "" {
-		*rssURL = "https://www.meetgor.com/rss.xml"
+		*rssURL = "https://www.meetgor.com/all-content/rss.xml"
 	}
 
 	posts, err := fetchSiteRSS(*rssURL)

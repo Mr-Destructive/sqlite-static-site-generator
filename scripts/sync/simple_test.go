@@ -9,7 +9,7 @@ import (
 
 func probeSiteRSSSimple() {
 	client := &http.Client{Timeout: 20 * time.Second}
-	url := "https://www.meetgor.com/rss.xml"
+	url := "https://www.meetgor.com/all-content/rss.xml"
 
 	fmt.Printf("Trying: %s\n", url)
 
