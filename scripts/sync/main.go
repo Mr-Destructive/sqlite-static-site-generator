@@ -1,13 +1,12 @@
 package main
 
 import (
-	"context"
-	"database/sql"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -32,8 +31,7 @@ type Post struct {
 
 func main() {
 	var (
-		withNewsletter = flag.Bool("newsletter", false, "sync newsletter RSS")
-		lookbackHours  = flag.Int("since-hours", 24, "lookback window in hours (optional)")
+		rssURL = flag.String("rss-url", "", "RSS feed URL to sync")
 	)
 	flag.Parse()
 
@@ -45,92 +43,13 @@ func main() {
 		die(err)
 	}
 
-	dbURL := os.Getenv("TURSO_DB_URL")
-	token := os.Getenv("TURSO_AUTH_TOKEN")
-	query := os.Getenv("TURSO_POSTS_QUERY")
-	if query == "" {
-		query = "SELECT slug, title, content, excerpt, tags, metadata, type_id, created_at, updated_at, published_at, status FROM posts WHERE status='published' AND (updated_at >= ? OR created_at >= ?)"
-	}
-	if dbURL == "" || token == "" {
-		die(fmt.Errorf("missing TURSO_DB_URL or TURSO_AUTH_TOKEN"))
-	}
-	if !strings.Contains(dbURL, "authToken=") {
-		sep := "?"
-		if strings.Contains(dbURL, "?") {
-			sep = "&"
-		}
-		dbURL = dbURL + sep + "authToken=" + token
+	if *rssURL == "" {
+		*rssURL = "https://www.meetgor.com/rss.xml"
 	}
 
-	db, err := sql.Open("libsql", dbURL)
+	posts, err := fetchSiteRSS(*rssURL)
 	if err != nil {
 		die(err)
-	}
-	defer db.Close()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	sinceTime := time.Now().Add(-time.Duration(*lookbackHours) * time.Hour)
-	var rows *sql.Rows
-	if strings.Contains(query, "?") {
-		rows, err = db.QueryContext(ctx, query, sinceTime, sinceTime)
-	} else {
-		rows, err = db.QueryContext(ctx, query)
-	}
-	if err != nil {
-		die(err)
-	}
-	defer rows.Close()
-
-	posts := []Post{}
-
-	for rows.Next() {
-		var slug, title, content, excerpt, tagsJSON, metaJSON, typeID, createdAt, updatedAt, publishedAt, status sql.NullString
-		if err := rows.Scan(&slug, &title, &content, &excerpt, &tagsJSON, &metaJSON, &typeID, &createdAt, &updatedAt, &publishedAt, &status); err != nil {
-			die(err)
-		}
-
-		post := Post{
-			Slug:    slug.String,
-			Section: typeID.String,
-			Title:   title.String,
-			Date:    pickDate(publishedAt.String, createdAt.String, updatedAt.String),
-			BodyMD:  content.String,
-			Meta:    map[string]interface{}{},
-			Source:  "turso",
-		}
-
-		if tagsJSON.Valid {
-			_ = json.Unmarshal([]byte(tagsJSON.String), &post.Tags)
-		}
-		if metaJSON.Valid {
-			_ = json.Unmarshal([]byte(metaJSON.String), &post.Meta)
-		}
-		if excerpt.Valid && excerpt.String != "" {
-			post.Meta["excerpt"] = excerpt.String
-		}
-		if status.Valid && status.String != "" {
-			post.Meta["status"] = status.String
-		}
-
-		if post.Section == "" {
-			post.Section = "posts"
-		}
-
-		if post.Slug == "" {
-			post.Slug = slugFromTitle(post.Title)
-		}
-
-		post.Path = buildPath(post.Section, post.Slug)
-		posts = append(posts, post)
-	}
-	if err := rows.Err(); err != nil {
-		die(err)
-	}
-
-	if *withNewsletter {
-		verifyNewsletter()
 	}
 
 	postsJSONPath := filepath.Join(dataDir, "posts.json")
@@ -264,41 +183,11 @@ func pickDate(publishedAt, createdAt, updatedAt string) string {
 	return ""
 }
 
-func parseNewsletter(feed *gofeed.Feed) []Post {
-	posts := []Post{}
-	for _, item := range feed.Items {
-		date := ""
-		if item.PublishedParsed != nil {
-			date = item.PublishedParsed.Format("2006-01-02")
-		}
-		body := item.Content
-		if body == "" {
-			body = item.Description
-		}
-		slug := slugFromTitle(item.Title)
-		posts = append(posts, Post{
-			Slug:    "newsletter/" + slug,
-			Section: "newsletter",
-			Path:    "newsletter/" + slug + ".md",
-			Title:   item.Title,
-			Date:    date,
-			Tags:    []string{"newsletter"},
-			Meta: map[string]interface{}{
-				"link":   item.Link,
-				"source": "substack",
-			},
-			BodyMD: body,
-			Source: "substack",
-		})
-	}
-	return posts
-}
-
-func fetchNewsletter(url string) ([]Post, error) {
+func fetchSiteRSS(rssURL string) ([]Post, error) {
 	client := &http.Client{Timeout: 20 * time.Second}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, rssURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", url, err)
+		return nil, fmt.Errorf("%s: %w", rssURL, err)
 	}
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
 	req.Header.Set("Accept", "application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.1")
@@ -306,46 +195,112 @@ func fetchNewsletter(url string) ([]Post, error) {
 	req.Header.Set("Referer", "https://www.google.com/")
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", url, err)
+		return nil, fmt.Errorf("%s: %w", rssURL, err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("%s: newsletter feed returned status %s", url, resp.Status)
+		return nil, fmt.Errorf("%s: feed returned status %s", rssURL, resp.Status)
 	}
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", url, err)
+		return nil, fmt.Errorf("%s: %w", rssURL, err)
 	}
 	parser := gofeed.NewParser()
 	contentType := resp.Header.Get("Content-Type")
 	feed, err := parser.ParseString(string(b))
 	if err != nil {
-		return nil, fmt.Errorf("%s: failed to parse feed (content-type %q): %w", url, contentType, err)
+		return nil, fmt.Errorf("%s: failed to parse feed (content-type %q): %w", rssURL, contentType, err)
+	}
+	return parseFeedPosts(feed)
+}
+
+func parseFeedPosts(feed *gofeed.Feed) ([]Post, error) {
+	posts := []Post{}
+	seen := map[string]struct{}{}
+
+	for _, item := range feed.Items {
+		post, ok := parseFeedItem(item)
+		if !ok {
+			continue
+		}
+		if _, exists := seen[post.Path]; exists {
+			continue
+		}
+		seen[post.Path] = struct{}{}
+		posts = append(posts, post)
+	}
+	return posts, nil
+}
+
+func parseFeedItem(item *gofeed.Item) (Post, bool) {
+	if item == nil || item.Link == "" {
+		return Post{}, false
 	}
 
-	return parseNewsletter(feed), nil
+	u, err := url.Parse(item.Link)
+	if err != nil {
+		return Post{}, false
+	}
+
+	path := strings.Trim(u.Path, "/")
+	if path == "" {
+		return Post{}, false
+	}
+
+	parts := strings.Split(path, "/")
+	section := "posts"
+	slug := path
+	if len(parts) > 1 {
+		section = parts[0]
+		slug = strings.Join(parts[1:], "/")
+	}
+
+	if section == "" {
+		section = "posts"
+	}
+	if slug == "" {
+		slug = slugFromTitle(item.Title)
+	}
+
+	date := ""
+	if item.PublishedParsed != nil {
+		date = item.PublishedParsed.Format("2006-01-02")
+	}
+	body := item.Content
+	if body == "" {
+		body = item.Description
+	}
+
+	tags := make([]string, 0, len(item.Categories))
+	for _, cat := range item.Categories {
+		tag := strings.TrimSpace(cat)
+		if tag != "" {
+			tags = append(tags, tag)
+		}
+	}
+
+	meta := map[string]interface{}{
+		"link":   item.Link,
+		"source": "rss",
+	}
+	if item.Description != "" {
+		meta["excerpt"] = item.Description
+	}
+
+	return Post{
+		Slug:    slug,
+		Section: section,
+		Path:    buildPath(section, slug),
+		Title:   item.Title,
+		Date:    date,
+		Tags:    tags,
+		Meta:    meta,
+		BodyMD:  body,
+		Source:  "rss",
+	}, true
 }
 
 func die(err error) {
 	fmt.Fprintln(os.Stderr, err)
 	os.Exit(1)
-}
-
-func verifyNewsletter() {
-	rssURL := os.Getenv("NEWSLETTER_RSS_URL")
-	if rssURL == "" {
-		rssURL = "https://www.meetgor.com/type/newsletter/rss.xml"
-	}
-	posts, err := fetchNewsletter(rssURL)
-	if err != nil {
-		die(err)
-	}
-	fmt.Fprintf(os.Stderr, "newsletter fetch succeeded (%d posts)\n", len(posts))
-}
-
-func init() {
-	if len(os.Args) > 1 && os.Args[1] == "--test-feed" {
-		verifyNewsletter()
-		os.Exit(0)
-	}
 }
