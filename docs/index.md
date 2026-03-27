@@ -20,7 +20,7 @@ python3 -m http.server 8000
 Open:
 
 ```
-http://localhost:8000/db/
+http://localhost:8000/
 ```
 
 ## Core tables

@@ -39,12 +39,8 @@ func main() {
 
 	cwd, _ := os.Getwd()
 	repoRoot := findRepoRoot(cwd)
-	postsDir := filepath.Join(repoRoot, "db", "posts")
 	dataDir := filepath.Join(repoRoot, "db", "data")
 
-	if err := os.MkdirAll(postsDir, 0o755); err != nil {
-		die(err)
-	}
 	if err := os.MkdirAll(dataDir, 0o755); err != nil {
 		die(err)
 	}
@@ -135,45 +131,6 @@ func main() {
 
 	if *withNewsletter {
 		verifyNewsletter()
-	}
-
-	// overwrite db/posts
-	if err := os.RemoveAll(postsDir); err != nil {
-		die(err)
-	}
-	if err := os.MkdirAll(postsDir, 0o755); err != nil {
-		die(err)
-	}
-
-	for _, p := range posts {
-		path := filepath.Join(postsDir, filepath.FromSlash(p.Path))
-		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-			die(err)
-		}
-		if err := os.WriteFile(path, []byte(p.BodyMD+"\n"), 0o644); err != nil {
-			die(err)
-		}
-		meta := map[string]interface{}{}
-		for k, v := range p.Meta {
-			meta[k] = v
-		}
-		if p.Title != "" {
-			meta["title"] = p.Title
-		}
-		if p.Date != "" {
-			meta["date"] = p.Date
-		}
-		if len(p.Tags) > 0 {
-			meta["tags"] = p.Tags
-		}
-		meta["section"] = p.Section
-		meta["source"] = p.Source
-
-		metaPath := strings.TrimSuffix(path, filepath.Ext(path)) + ".json"
-		b, _ := json.MarshalIndent(meta, "", "  ")
-		if err := os.WriteFile(metaPath, append(b, '\n'), 0o644); err != nil {
-			die(err)
-		}
 	}
 
 	postsJSONPath := filepath.Join(dataDir, "posts.json")

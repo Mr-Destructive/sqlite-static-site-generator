@@ -165,5 +165,5 @@ Full details live in `docs/s3g/README.md`.
 
 ## Browser SQLite Shell
 
-There is a tiny browser shell in `db/` that loads the posts into SQLite (WASM) so you can query them as a table.
-Open `db/index.html` in a static server and run SQL against the `posts` table.
+There is a tiny browser shell at the repo root that loads the posts into SQLite (WASM) so you can query them as a table.
+Open `index.html` in a static server and run SQL against the `posts` table.
