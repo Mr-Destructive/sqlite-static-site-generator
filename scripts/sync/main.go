@@ -29,6 +29,8 @@ type Post struct {
 	Source  string                 `json:"source"`
 }
 
+const defaultRSSURL = "https://www.meetgor.com/all-content/rss.xml"
+
 func main() {
 	var (
 		rssURL = flag.String("rss-url", "", "RSS feed URL to sync")
@@ -44,7 +46,7 @@ func main() {
 	}
 
 	if *rssURL == "" {
-		*rssURL = "https://www.meetgor.com/all-content/rss.xml"
+		*rssURL = defaultRSSURL
 	}
 
 	posts, err := fetchSiteRSS(*rssURL)
