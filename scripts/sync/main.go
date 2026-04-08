@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"flag"
 	"fmt"
 	"io"
@@ -30,6 +31,13 @@ type Post struct {
 }
 
 const defaultRSSURL = "https://www.meetgor.com/all-content/rss.xml"
+
+type rssFeedContent struct {
+	Items []struct {
+		Link    string `xml:"link"`
+		Content string `xml:"content"`
+	} `xml:"channel>item"`
+}
 
 func main() {
 	var (
@@ -213,15 +221,16 @@ func fetchSiteRSS(rssURL string) ([]Post, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s: failed to parse feed (content-type %q): %w", rssURL, contentType, err)
 	}
-	return parseFeedPosts(feed)
+	return parseFeedPosts(feed, b)
 }
 
-func parseFeedPosts(feed *gofeed.Feed) ([]Post, error) {
+func parseFeedPosts(feed *gofeed.Feed, raw []byte) ([]Post, error) {
 	posts := []Post{}
 	seen := map[string]struct{}{}
+	contentByLink := rssContentByLink(raw)
 
 	for _, item := range feed.Items {
-		post, ok := parseFeedItem(item)
+		post, ok := parseFeedItem(item, contentByLink[item.Link])
 		if !ok {
 			continue
 		}
@@ -234,7 +243,23 @@ func parseFeedPosts(feed *gofeed.Feed) ([]Post, error) {
 	return posts, nil
 }
 
-func parseFeedItem(item *gofeed.Item) (Post, bool) {
+func rssContentByLink(raw []byte) map[string]string {
+	var feed rssFeedContent
+	if err := xml.Unmarshal(raw, &feed); err != nil {
+		return map[string]string{}
+	}
+	out := make(map[string]string, len(feed.Items))
+	for _, item := range feed.Items {
+		body := strings.TrimSpace(item.Content)
+		if item.Link == "" || body == "" {
+			continue
+		}
+		out[item.Link] = body
+	}
+	return out
+}
+
+func parseFeedItem(item *gofeed.Item, rawContent string) (Post, bool) {
 	if item == nil || item.Link == "" {
 		return Post{}, false
 	}
@@ -268,7 +293,10 @@ func parseFeedItem(item *gofeed.Item) (Post, bool) {
 	if item.PublishedParsed != nil {
 		date = item.PublishedParsed.Format("2006-01-02")
 	}
-	body := item.Content
+	body := strings.TrimSpace(rawContent)
+	if body == "" {
+		body = item.Content
+	}
 	if body == "" {
 		body = item.Description
 	}
