@@ -33,10 +33,12 @@ type Post struct {
 const defaultRSSURL = "https://www.meetgor.com/all-content/rss.xml"
 
 type rssFeedContent struct {
-	Items []struct {
-		Link    string `xml:"link"`
-		Content string `xml:"content"`
-	} `xml:"channel>item"`
+	Channel struct {
+		Items []struct {
+			Link    string `xml:"link"`
+			Content string `xml:"content"`
+		} `xml:"item"`
+	} `xml:"channel"`
 }
 
 func main() {
@@ -248,8 +250,8 @@ func rssContentByLink(raw []byte) map[string]string {
 	if err := xml.Unmarshal(raw, &feed); err != nil {
 		return map[string]string{}
 	}
-	out := make(map[string]string, len(feed.Items))
-	for _, item := range feed.Items {
+	out := make(map[string]string, len(feed.Channel.Items))
+	for _, item := range feed.Channel.Items {
 		body := strings.TrimSpace(item.Content)
 		if item.Link == "" || body == "" {
 			continue
